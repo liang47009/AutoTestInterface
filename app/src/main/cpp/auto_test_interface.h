@@ -12,10 +12,10 @@ enum {
 };
 
 struct host_info {
-    const char *ip;
+    std::string ip;
     unsigned int port;
 
-    host_info() : ip(0), port(0) {}
+    host_info() : port(0) {}
 };
 
 class AutoTestInterface;
@@ -78,7 +78,7 @@ public:
      * @param msg
      * @param len
      */
-    void write_message(const char *msg, int len);
+    void write_message(const char *msg, size_t len);
 
     /**
      * 获取本机地址 ipv4

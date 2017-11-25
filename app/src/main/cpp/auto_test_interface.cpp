@@ -157,12 +157,12 @@ namespace AutoTest {
     void *start_server(void *args) {
         if (args) {
             AutoTestInterface *ati = (AutoTestInterface *) args;
-            const char *ip = ati->hi.ip;
+            std::string ip = ati->hi.ip;
             unsigned int port = ati->hi.port;
             struct sockaddr_in remote_addr; //服务器端网络地址结构体
             memset(&remote_addr, 0, sizeof(remote_addr)); //数据初始化--清零
             remote_addr.sin_family = AF_INET; //设置为IP通信
-            remote_addr.sin_addr.s_addr = inet_addr(ip);//服务器IP地址
+            remote_addr.sin_addr.s_addr = inet_addr(ip.c_str());//服务器IP地址
             remote_addr.sin_port = htons(port); //服务器端口号
 
             struct event_base *server_base = event_base_new();
@@ -187,7 +187,7 @@ namespace AutoTest {
     void *start_client(void *args) {
         if (args) {
             AutoTestInterface *ati = (AutoTestInterface *) args;
-            const char *ip = ati->hi.ip;
+            std::string ip = ati->hi.ip;
             unsigned int port = ati->hi.port;
             int fd = socket(AF_INET, SOCK_STREAM, 0);
             if (-1 == fd) {
@@ -197,7 +197,7 @@ namespace AutoTest {
             struct sockaddr_in remote_addr; //服务器端网络地址结构体
             memset(&remote_addr, 0, sizeof(remote_addr)); //数据初始化--清零
             remote_addr.sin_family = AF_INET; //设置为IP通信
-            remote_addr.sin_addr.s_addr = inet_addr(ip);//服务器IP地址
+            remote_addr.sin_addr.s_addr = inet_addr(ip.c_str());//服务器IP地址
             remote_addr.sin_port = htons(port); //服务器端口号
             struct event_base *client_base = event_base_new();
             struct bufferevent *conn = bufferevent_socket_new(client_base, fd,
@@ -286,7 +286,7 @@ bool AutoTestInterface::start(const char *ip, unsigned int port, int mode) {
     return true;
 }
 
-void AutoTestInterface::write_message(const char *msg, int len) {
+void AutoTestInterface::write_message(const char *msg, size_t len) {
     if (m_callback) {
         m_callback->on_write(this, msg, len);
     }
