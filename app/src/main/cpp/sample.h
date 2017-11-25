@@ -6,6 +6,8 @@
 
 class Sample {
 public :
+    Sample();
+    ~Sample();
     void initServer();
 
     void initClient();
@@ -16,9 +18,9 @@ public :
 
 private:
 
-    AutoTestInterface autotest_server;
+    AutoTestInterface* autotest_server;
 
-    AutoTestInterface autotest_client;
+    AutoTestInterface* autotest_client;
 
 };
 

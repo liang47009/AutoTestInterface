@@ -18,13 +18,13 @@ add_library( native-lib SHARED
             src/main/cpp/sample.cpp
             )
 
-add_library( libautotestinterface STATIC
+add_library( autotestinterface STATIC
             src/main/cpp/auto_test_interface.cpp )
 
-add_library(libeventextra STATIC IMPORTED)
-set_target_properties(libeventextra PROPERTIES IMPORTED_LOCATION ${PROJECT_SOURCE_DIR}/src/main/cpp/libevent/lib/${ANDROID_ABI}/libeventextra.a)
+add_library(eventextra STATIC IMPORTED)
+set_target_properties(eventextra PROPERTIES IMPORTED_LOCATION ${PROJECT_SOURCE_DIR}/src/main/cpp/libevent/lib/${ANDROID_ABI}/libeventextra.a)
 
-add_library(libeventcore STATIC IMPORTED)
-set_target_properties(libeventcore PROPERTIES IMPORTED_LOCATION ${PROJECT_SOURCE_DIR}/src/main/cpp/libevent/lib/${ANDROID_ABI}/libeventcore.a)
+add_library(eventcore STATIC IMPORTED)
+set_target_properties(eventcore PROPERTIES IMPORTED_LOCATION ${PROJECT_SOURCE_DIR}/src/main/cpp/libevent/lib/${ANDROID_ABI}/libeventcore.a)
 
-target_link_libraries( native-lib log android libautotestinterface libeventextra libeventcore)
+target_link_libraries( native-lib log android autotestinterface eventextra eventcore)

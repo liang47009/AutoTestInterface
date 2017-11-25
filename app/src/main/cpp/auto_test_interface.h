@@ -1,6 +1,12 @@
 #ifndef __auto_test_interface_h__
 #define __auto_test_interface_h__
 
+#include <string>
+
+#include <event2/event.h>
+#include <event2/listener.h>
+#include <event2/bufferevent.h>
+
 enum {
     CLIENT_MODE, SERVER_MODE
 };
@@ -12,13 +18,39 @@ struct host_info {
     host_info() : ip(0), port(0) {}
 };
 
+class AutoTestInterface;
+
 class AutoTestInterfaceCallback {
 public:
-    virtual void on_read(AutoTestInterface *ctx, const char *msg, size_t len) {};
+    /**
+     * 已连接
+     * @param ctx
+     * @param fd  sock id
+     */
+    virtual void on_connect(AutoTestInterface *ctx, int fd) {};
 
-    virtual void on_connect(int fd) {};
+    /**
+     * 收到消息
+     * @param ctx
+     * @param msg
+     * @param fd
+     */
+    virtual void on_recv(AutoTestInterface *ctx, std::string msg, int fd) {};
 
-    virtual void on_write(std::string msg) {}
+    /**
+     * 出现错误
+     * @param ctx
+     * @param code
+     * @param fd
+     */
+    virtual void on_error(AutoTestInterface *ctx, int code, int fd) {};
+
+    /**
+     * 自定义写入内容
+     * @param pInterface
+     * @param string
+     */
+    virtual void on_write(AutoTestInterface *pInterface, std::string msg) {}
 };
 
 class AutoTestInterface {
@@ -28,17 +60,34 @@ public:
 
     ~AutoTestInterface();
 
+    /**
+     * 启动一个接口
+     * @param ip
+     * @param port
+     * @param mode
+     * @return
+     */
     bool start(const char *ip, unsigned int port, int mode);
 
+    /**
+     * 自定义写入内容
+     * @param msg
+     */
     void write_message(std::string msg);
 
     AutoTestInterfaceCallback *m_callback = nullptr;
 
-    host_info hi;
 private:
     bool m_inited;
 
     int m_mode;
+
+public:
+    host_info hi;
+    bufferevent *conn;
+    evconnlistener *m_baselistener;
+    event_base *server_base;
+    event_base *client_base;
 };
 
 #endif// __auto_test_interface_h__
