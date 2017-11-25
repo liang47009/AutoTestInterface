@@ -14,7 +14,9 @@ include_directories(src/main/cpp/libevent/android)
 
 add_library( native-lib SHARED
             src/main/cpp/native-lib.cpp
-            src/main/cpp/auto_test_interface.cpp )
+            src/main/cpp/my_listener.cpp
+            src/main/cpp/sample.cpp
+            )
 
 add_library( libautotestinterface STATIC
             src/main/cpp/auto_test_interface.cpp )

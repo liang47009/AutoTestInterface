@@ -15,4 +15,21 @@ public class JNILib {
 
     public static native void startServer();
 
+
+}
+
+class asdf extends JNILib {
+
+}
+
+class sdafasf {
+
+    public void set(JNILib lib) {
+
+    }
+
+    public void main() {
+        asdf asdfs = new asdf();
+        this.set(asdfs);
+    }
 }
