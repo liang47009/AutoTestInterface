@@ -41,7 +41,7 @@ void Sample::initClient() {
 
 void Sample::sendServermsg(std::string msg) {
     if (autotest_server) {
-        autotest_server->write_message(msg.c_str());
+        autotest_server->write_message(msg.c_str(), msg.length());
 //        delete autotest_server;
 //        autotest_server = nullptr;
     }
@@ -49,7 +49,7 @@ void Sample::sendServermsg(std::string msg) {
 
 void Sample::sendClientMsg(std::string msg) {
     if (autotest_client) {
-        autotest_client->write_message(msg.c_str());
+        autotest_client->write_message(msg.c_str(), msg.length());
 //        delete autotest_client;
 //        autotest_client = nullptr;
     }

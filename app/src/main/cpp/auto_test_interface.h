@@ -21,7 +21,9 @@ struct host_info {
 class AutoTestInterface;
 
 class AutoTestInterfaceCallback {
+
 public:
+
     /**
      * 已连接
      * @param ctx
@@ -33,9 +35,17 @@ public:
      * 收到消息
      * @param ctx
      * @param msg
-     * @param fd
+     * @param len
      */
-    virtual void on_recv(AutoTestInterface *ctx, std::string msg, int fd) {};
+    virtual void on_recv(AutoTestInterface *ctx, const char *msg, size_t len) {};
+
+    /**
+     * 自定义写入内容
+     * @param pInterface
+     * @param msg
+     * @param len
+     */
+    virtual void on_write(AutoTestInterface *pInterface, const char *msg, size_t len) {}
 
     /**
      * 出现错误
@@ -45,12 +55,6 @@ public:
      */
     virtual void on_error(AutoTestInterface *ctx, int code, int fd) {};
 
-    /**
-     * 自定义写入内容
-     * @param pInterface
-     * @param string
-     */
-    virtual void on_write(AutoTestInterface *pInterface, std::string msg) {}
 };
 
 class AutoTestInterface {
@@ -72,8 +76,9 @@ public:
     /**
      * 自定义写入内容
      * @param msg
+     * @param len
      */
-    void write_message(std::string msg);
+    void write_message(const char *msg, int len);
 
     /**
      * 获取本机地址 ipv4

@@ -51,25 +51,27 @@ namespace AutoTest {
 //    struct timeval start_t;
 //    gettimeofday(&start_t, nullptr);
         struct evbuffer *input = bufferevent_get_input(bev);
+//        struct evbuffer *out = bufferevent_get_output(bev);
+//        evbuffer_add_buffer(out, input);
         size_t len = evbuffer_get_length(input);
-
-        char *buf = (char *) malloc(sizeof(char) * len);
-        if (buf == nullptr) {
-            return;
-        }
-        evbuffer_remove(input, buf, len);
-        len = evbuffer_get_length(input);
-        if (ctx) {
-            AutoTestInterface *a = (AutoTestInterface *) ctx;
-            if (a->m_callback) {
-                int fd = bufferevent_getfd(bev);
-                a->m_callback->on_recv(a, buf, fd);
-            } else {
-                LOGI("no set callback server accept client");
+        if (len > 0) {
+            size_t size = (sizeof(char) * len) + 1;
+            char *buf = (char *) malloc(size);
+            if (buf == nullptr) {
+                return;
             }
+            evbuffer_remove(input, buf, len);
+            if (ctx) {
+                AutoTestInterface *a = (AutoTestInterface *) ctx;
+                if (a->m_callback) {
+                    a->m_callback->on_recv(a, buf, len);
+                } else {
+                    LOGI("no set callback server accept client");
+                }
+            }
+            free(buf);
+            buf = nullptr;
         }
-        free(buf);
-        buf = nullptr;
     }
 
 //void client_event_cb(struct bufferevent *bev, short what, void *ctx) {
@@ -136,7 +138,6 @@ namespace AutoTest {
 
     void server_on_accept(struct evconnlistener *listner, evutil_socket_t fd, struct sockaddr *addr,
                           int socklen, void *args) {
-        LOGI("accept a client: fd:%d , socklen:%d, addr:%s", fd, socklen, addr->sa_data);
         int enable = 1;
         setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &enable, sizeof(enable));
         if (args) {
@@ -285,9 +286,9 @@ bool AutoTestInterface::start(const char *ip, unsigned int port, int mode) {
     return true;
 }
 
-void AutoTestInterface::write_message(std::string msg) {
+void AutoTestInterface::write_message(const char *msg, int len) {
     if (m_callback) {
-        m_callback->on_write(this, msg);
+        m_callback->on_write(this, msg, len);
     }
 }
 
