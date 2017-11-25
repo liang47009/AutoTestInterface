@@ -231,15 +231,6 @@ namespace AutoTest {
 
 }
 
-int issetugid() {
-//    LOGI("============ issetugid ");
-    return 0;
-}
-
-void arc4random_addrandom(unsigned char *c, int i) {
-//    LOGI("============ arc4random_addrandom: %s, %d", c, i);
-}
-
 AutoTestInterface::AutoTestInterface()
         : m_inited(false), m_mode(0), m_callback(nullptr), conn(nullptr), server_base(nullptr),
           m_baselistener(nullptr), client_base(nullptr) {

@@ -22,10 +22,13 @@ add_library( autotestinterface STATIC
             src/main/cpp/ifaddrs.c
             src/main/cpp/auto_test_interface.cpp )
 
+add_library( errormode STATIC
+            src/main/cpp/error.c)
+
 add_library(eventextra STATIC IMPORTED)
 set_target_properties(eventextra PROPERTIES IMPORTED_LOCATION ${PROJECT_SOURCE_DIR}/src/main/cpp/libevent/lib/${ANDROID_ABI}/libeventextra.a)
 
 add_library(eventcore STATIC IMPORTED)
 set_target_properties(eventcore PROPERTIES IMPORTED_LOCATION ${PROJECT_SOURCE_DIR}/src/main/cpp/libevent/lib/${ANDROID_ABI}/libeventcore.a)
 
-target_link_libraries( native-lib log android autotestinterface eventextra eventcore)
+target_link_libraries( native-lib log android autotestinterface eventextra eventcore errormode)
