@@ -19,6 +19,7 @@ add_library( native-lib SHARED
             )
 
 add_library( autotestinterface STATIC
+            src/main/cpp/ifaddrs.c
             src/main/cpp/auto_test_interface.cpp )
 
 add_library(eventextra STATIC IMPORTED)

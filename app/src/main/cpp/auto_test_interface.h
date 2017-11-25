@@ -75,6 +75,12 @@ public:
      */
     void write_message(std::string msg);
 
+    /**
+     * 获取本机地址 ipv4
+     * @return
+     */
+    std::string getLocalIPv4();
+
     AutoTestInterfaceCallback *m_callback = nullptr;
 
 private:
@@ -88,6 +94,7 @@ public:
     evconnlistener *m_baselistener;
     event_base *server_base;
     event_base *client_base;
+
 };
 
 #endif// __auto_test_interface_h__
