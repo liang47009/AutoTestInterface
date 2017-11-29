@@ -34,9 +34,15 @@ Java_com_yunfeng_autotestinterface_JNILib_sendservermsg(JNIEnv *env, jclass type
     env->ReleaseStringUTFChars(text_, text);
 }
 
+void *initClient(void *args) {
+    sample.initClient();
+    return NULL;
+}
+
 JNIEXPORT void JNICALL
 Java_com_yunfeng_autotestinterface_JNILib_startClient(JNIEnv *env, jclass type) {
-    sample.initClient();
+    pthread_t m_pthread_t;
+    int err = pthread_create(&m_pthread_t, NULL, initClient, NULL);
 }
 
 JNIEXPORT void JNICALL

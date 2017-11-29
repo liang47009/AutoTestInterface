@@ -8,7 +8,7 @@ void MyCallback::on_error(AutoTestInterface *ctx, int code, int fd) {
 
 void MyCallback::on_recv(AutoTestInterface *ctx, const char *msg, size_t len) {
     for (int i = 0; i < len; i++) {
-        LOGI("on_write msg: %d", msg[i]);
+        LOGI("on_recv msg: %d", msg[i]);
     }
 }
 

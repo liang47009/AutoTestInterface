@@ -2,6 +2,7 @@
 #include <string.h>
 
 #ifdef __ANDROID__
+
 #include <sys/select.h>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -109,13 +110,13 @@ namespace AutoTest {
     }
 
 #ifdef __ANDROID__
-	void *start_server(void *args) {
+    void *start_server(void *args) {
 #else ifdef WIN32
-	DWORD WINAPI start_server(LPVOID args) {
-		WSADATA ws;
-		WORD wVersion = MAKEWORD(2,2);
-		if (WSAStartup(wVersion, &ws) != 0)
-			return NULL;
+        DWORD WINAPI start_server(LPVOID args) {
+            WSADATA ws;
+            WORD wVersion = MAKEWORD(2,2);
+            if (WSAStartup(wVersion, &ws) != 0)
+                return NULL;
 #endif
         if (args) {
             AutoTestInterface *ati = (AutoTestInterface *) args;
@@ -147,13 +148,13 @@ namespace AutoTest {
     }
 
 #ifdef __ANDROID__
-	void *start_client(void *args) {
+    void *start_client(void *args) {
 #else ifdef WIN32
-	DWORD WINAPI start_client(LPVOID args) {
-		WSADATA ws;
-		WORD wVersion = MAKEWORD(2,2);
-		if (WSAStartup(wVersion, &ws) != 0)
-			return NULL;
+        DWORD WINAPI start_client(LPVOID args) {
+            WSADATA ws;
+            WORD wVersion = MAKEWORD(2,2);
+            if (WSAStartup(wVersion, &ws) != 0)
+                return NULL;
 #endif
         if (args) {
             AutoTestInterface *ati = (AutoTestInterface *) args;
@@ -189,12 +190,12 @@ namespace AutoTest {
 
     void init_client_thread(AutoTestInterface *autoTestInterface) {
 #ifdef __ANDROID__
-		pthread_t thread;
-		pthread_create(&thread, NULL, start_client, (void *) autoTestInterface);
-		pthread_detach(thread);
+        pthread_t thread;
+        pthread_create(&thread, NULL, start_client, (void *) autoTestInterface);
+        pthread_detach(thread);
 #else ifdef WIN32
         HANDLE handle = CreateThread(NULL,0,AutoTest::start_client, autoTestInterface,0,NULL);
-		WaitForSingleObject(handle, INFINITE);
+        WaitForSingleObject(handle, INFINITE);
 #endif
     }
 
@@ -204,8 +205,8 @@ namespace AutoTest {
         pthread_create(&thread, NULL, AutoTest::start_server, (void *) autoTestInterface);
         pthread_detach(thread);
 #else ifdef WIN32
-		HANDLE handle = CreateThread(NULL,0,AutoTest::start_server, autoTestInterface,0,NULL);
-		WaitForSingleObject(handle, INFINITE);
+        HANDLE handle = CreateThread(NULL,0,AutoTest::start_server, autoTestInterface,0,NULL);
+        WaitForSingleObject(handle, INFINITE);
 #endif
     }
 
@@ -265,30 +266,30 @@ void AutoTestInterface::write_message(const char *msg, size_t len) {
 
 std::string AutoTestInterface::getLocalIPv4() {
 #ifdef __ANDROID__
-	struct ifaddrs *ifaddr, *ifa;
-	if (getifaddrs(&ifaddr) == -1) {
-		LOGI("get local host ip error");
-	}
-	int family;
-	char host[NI_MAXHOST];
-	for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) {
-		if (ifa->ifa_addr == NULL) {
-			continue;
-		}
-		family = ifa->ifa_addr->sa_family;
-		if (family == AF_INET) {
-			int socklen = sizeof(struct sockaddr_in);
-			getnameinfo(ifa->ifa_addr, socklen, host, NI_MAXHOST, NULL, 0,
-				NI_NUMERICHOST);
-			std::string strhost(host);
+    struct ifaddrs *ifaddr, *ifa;
+    if (getifaddrs(&ifaddr) == -1) {
+        LOGI("get local host ip error");
+    }
+    int family;
+    char host[NI_MAXHOST];
+    for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) {
+        if (ifa->ifa_addr == NULL) {
+            continue;
+        }
+        family = ifa->ifa_addr->sa_family;
+        if (family == AF_INET) {
+            int socklen = sizeof(struct sockaddr_in);
+            getnameinfo(ifa->ifa_addr, socklen, host, NI_MAXHOST, NULL, 0,
+                        NI_NUMERICHOST);
+            std::string strhost(host);
 
-			int len = strhost.find(".", 0);
-			if (len == 3 && (strhost != "127.0.0.1")) {
-				return strhost;
-			}
-		}
-	}
-	freeifaddrs(ifaddr);
+            int len = strhost.find(".", 0);
+            if (len == 3 && (strhost != "127.0.0.1")) {
+                return strhost;
+            }
+        }
+    }
+    freeifaddrs(ifaddr);
 #endif
     return "172.19.34.237";
 }

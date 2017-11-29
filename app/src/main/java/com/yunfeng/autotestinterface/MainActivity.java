@@ -8,7 +8,7 @@ import android.widget.EditText;
 
 import com.snail.mobilesdk.platform.MobileSDKUtil;
 
-class MainActivity extends Activity {
+public class MainActivity extends Activity {
 
     private EditText sample_text;
 
