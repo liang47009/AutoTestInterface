@@ -144,7 +144,6 @@ namespace AutoTest {
                 LOGI("create server error!");
             }
         }
-        return NULL;
     }
 
 #ifdef __ANDROID__
@@ -185,7 +184,6 @@ namespace AutoTest {
                 LOGI("============ connect failed! ");
             }
         }
-        return NULL;
     }
 
     void init_client_thread(AutoTestInterface *autoTestInterface) {

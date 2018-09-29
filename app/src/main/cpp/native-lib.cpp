@@ -43,6 +43,7 @@ JNIEXPORT void JNICALL
 Java_com_yunfeng_autotestinterface_JNILib_startClient(JNIEnv *env, jclass type) {
     pthread_t m_pthread_t;
     int err = pthread_create(&m_pthread_t, NULL, initClient, NULL);
+    pthread_detach(m_pthread_t);
 }
 
 JNIEXPORT void JNICALL

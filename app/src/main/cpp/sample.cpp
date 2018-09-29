@@ -25,7 +25,7 @@ void Sample::initServer() {
         MyCallback *listener = new MyCallback;
         autotest_server->m_callback = listener;
         std::string ip = autotest_server->getLocalIPv4();
-        autotest_server->start(ip.c_str(), 8888, SERVER_MODE);
+        autotest_server->start("0.0.0.0", 4999, SERVER_MODE);
     }
 }
 
