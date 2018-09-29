@@ -22,7 +22,15 @@ class AutoTestInterface;
 
 class AutoTestInterfaceCallback {
 
+protected:
+    int fd;
 public:
+
+    AutoTestInterfaceCallback();
+
+    void setFd(int fd);
+
+    int getFd();
 
     /**
      * 已连接
@@ -34,18 +42,20 @@ public:
     /**
      * 收到消息
      * @param ctx
+     * @param fd
      * @param msg
      * @param len
      */
-    virtual void on_recv(AutoTestInterface *ctx, const char *msg, size_t len) {};
+    virtual void on_recv(AutoTestInterface *ctx, int fd, const char *msg, size_t len) {};
 
     /**
      * 自定义写入内容
      * @param pInterface
+     * @param fd
      * @param msg
      * @param len
      */
-    virtual void on_write(AutoTestInterface *pInterface, const char *msg, size_t len) {}
+    virtual void on_write(AutoTestInterface *pInterface, int fd, const char *msg, size_t len) {}
 
     /**
      * 出现错误

@@ -35,7 +35,7 @@ void Sample::initClient() {
         MyCallback *listener = new MyCallback;
         autotest_client->m_callback = listener;
         std::string ip = autotest_client->getLocalIPv4();
-        autotest_client->start(ip.c_str(), 8888, CLIENT_MODE);
+        autotest_client->start(ip.c_str(), 4999, CLIENT_MODE);
     }
 }
 

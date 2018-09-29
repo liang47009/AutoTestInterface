@@ -26,7 +26,6 @@
 #include <event2/event_compat.h>
 
 #include <string>
-#include <errno.h>
 
 #include "auto_test_interface.h"
 
@@ -42,16 +41,16 @@ namespace AutoTest {
                 return;
             }
             evbuffer_remove(input, buf, len);
+            buf[len] = '\0';
             if (ctx) {
                 AutoTestInterface *a = (AutoTestInterface *) ctx;
                 if (a->m_callback) {
-                    a->m_callback->on_recv(a, buf, len);
+                    a->m_callback->on_recv(a, a->m_callback->getFd(), buf, len);
                 } else {
                     LOGI("no set callback server accept client");
                 }
             }
             free(buf);
-            buf = NULL;
         }
     }
 
@@ -61,6 +60,7 @@ namespace AutoTest {
             int fd = bufferevent_getfd(bev);
             if (a->m_callback) {
                 if (what & BEV_EVENT_CONNECTED) {
+                    a->m_callback->setFd(fd);
                     a->m_callback->on_connect(a, fd);
                 } else if (what & BEV_EVENT_EOF
                            || what & BEV_EVENT_ERROR
@@ -81,37 +81,53 @@ namespace AutoTest {
         if (ctx) {
             AutoTestInterface *a = (AutoTestInterface *) ctx;
             int err = EVUTIL_SOCKET_ERROR();
-            a->m_callback->on_error(a, err, 0);
+            if (a->m_callback) {
+                a->m_callback->on_error(a, err, 0);
+            }
             LOGI("create server error, %s", evutil_socket_error_to_string(err));
         }
     }
 
     void auto_test_write_cb(struct bufferevent *bev, void *ctx) {
         if (ctx) {
-            AutoTestInterface *a = (AutoTestInterface *) ctx;
-
+//            AutoTestInterface *a = (AutoTestInterface *) ctx;
+            struct evbuffer *input = bufferevent_get_input(bev);
+            size_t len = evbuffer_get_length(input);
+            size_t size = (sizeof(char) * len) + 1;
+            char *buf = (char *) malloc(size);
+            if (buf == NULL) {
+                return;
+            }
+            evbuffer_remove(input, buf, len);
+            buf[len] = '\0';
+            LOGI("auto_test_write_cb: %s", buf);
         }
     }
 
-    void server_on_accept(struct evconnlistener *listner, evutil_socket_t fd, struct sockaddr *addr,
-                          int socklen, void *args) {
+    void server_on_accept(struct evconnlistener *listner, evutil_socket_t fd, struct sockaddr *,
+                          int, void *args) {
         if (args) {
             AutoTestInterface *a = (AutoTestInterface *) args;
             if (a->m_callback) {
+                a->m_callback->setFd(fd);
                 a->m_callback->on_connect(a, fd);
             } else {
                 LOGI("no set callback server accept client: %d", fd);
             }
+            struct event_base *base = evconnlistener_get_base(listner);
+            struct bufferevent *bev = bufferevent_socket_new(base, fd, BEV_OPT_CLOSE_ON_FREE);
+            bufferevent_setcb(bev, auto_test_on_readcb, auto_test_write_cb, auto_test_event_cb,
+                              args);
+            bufferevent_enable(bev, EV_READ | EV_WRITE);
+        } else {
+            LOGI("no set context to accept");
         }
-        struct event_base *base = evconnlistener_get_base(listner);
-        struct bufferevent *bev = bufferevent_socket_new(base, fd, BEV_OPT_CLOSE_ON_FREE);
-        bufferevent_setcb(bev, auto_test_on_readcb, auto_test_write_cb, auto_test_event_cb, args);
-        bufferevent_enable(bev, EV_READ | EV_WRITE);
     }
 
-#ifdef __ANDROID__
+#if defined(__ANDROID__)
+
     void *start_server(void *args) {
-#else ifdef WIN32
+#elif defined(WIN32)
         DWORD WINAPI start_server(LPVOID args) {
             WSADATA ws;
             WORD wVersion = MAKEWORD(2,2);
@@ -144,11 +160,13 @@ namespace AutoTest {
                 LOGI("create server error!");
             }
         }
+        return NULL;
     }
 
-#ifdef __ANDROID__
+#if  defined(__ANDROID__)
+
     void *start_client(void *args) {
-#else ifdef WIN32
+#elif defined(WIN32)
         DWORD WINAPI start_client(LPVOID args) {
             WSADATA ws;
             WORD wVersion = MAKEWORD(2,2);
@@ -184,25 +202,26 @@ namespace AutoTest {
                 LOGI("============ connect failed! ");
             }
         }
+        return NULL;
     }
 
     void init_client_thread(AutoTestInterface *autoTestInterface) {
-#ifdef __ANDROID__
+#if defined(__ANDROID__)
         pthread_t thread;
         pthread_create(&thread, NULL, start_client, (void *) autoTestInterface);
         pthread_detach(thread);
-#else ifdef WIN32
+#elif defined(WIN32)
         HANDLE handle = CreateThread(NULL,0,AutoTest::start_client, autoTestInterface,0,NULL);
         WaitForSingleObject(handle, INFINITE);
 #endif
     }
 
     void init_server_thread(AutoTestInterface *autoTestInterface) {
-#ifdef __ANDROID__
+#if defined(__ANDROID__)
         pthread_t thread;
         pthread_create(&thread, NULL, AutoTest::start_server, (void *) autoTestInterface);
         pthread_detach(thread);
-#else ifdef WIN32
+#elif defined(WIN32)
         HANDLE handle = CreateThread(NULL,0,AutoTest::start_server, autoTestInterface,0,NULL);
         WaitForSingleObject(handle, INFINITE);
 #endif
@@ -258,12 +277,12 @@ bool AutoTestInterface::start(const char *ip, unsigned int port, int mode) {
 
 void AutoTestInterface::write_message(const char *msg, size_t len) {
     if (m_callback) {
-        m_callback->on_write(this, msg, len);
+        m_callback->on_write(this, m_callback->getFd(), msg, len);
     }
 }
 
 std::string AutoTestInterface::getLocalIPv4() {
-#ifdef __ANDROID__
+#if defined(__ANDROID__)
     struct ifaddrs *ifaddr, *ifa;
     if (getifaddrs(&ifaddr) == -1) {
         LOGI("get local host ip error");
@@ -290,4 +309,18 @@ std::string AutoTestInterface::getLocalIPv4() {
     freeifaddrs(ifaddr);
 #endif
     return "172.19.34.237";
+}
+
+void AutoTestInterfaceCallback::setFd(int fd) {
+    if (this->fd == 0) {
+        this->fd = fd;
+    }
+}
+
+AutoTestInterfaceCallback::AutoTestInterfaceCallback() {
+    this->fd = 0;
+}
+
+int AutoTestInterfaceCallback::getFd() {
+    return this->fd;
 }
