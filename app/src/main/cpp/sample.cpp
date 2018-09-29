@@ -3,9 +3,21 @@
 #include "sample.h"
 #include "my_listener.h"
 
-Sample::Sample()
-        : autotest_client(nullptr), autotest_server(nullptr) {
-
+Sample::Sample() {
+    {
+        autotest_server = new AutoTestInterface;
+        MyCallback *listener = new MyCallback;
+        autotest_server->m_callback = listener;
+        std::string ip = autotest_server->getLocalIPv4();
+        autotest_server->init("0.0.0.0", 4999, SERVER_MODE);
+    }
+    {
+        autotest_client = new AutoTestInterface;
+        MyCallback *listener = new MyCallback;
+        autotest_client->m_callback = listener;
+        std::string ip = autotest_client->getLocalIPv4();
+        autotest_client->init(ip.c_str(), 4999, CLIENT_MODE);
+    }
 }
 
 Sample::~Sample() {
@@ -20,23 +32,11 @@ Sample::~Sample() {
 }
 
 void Sample::initServer() {
-    if (!autotest_server) {
-        autotest_server = new AutoTestInterface;
-        MyCallback *listener = new MyCallback;
-        autotest_server->m_callback = listener;
-        std::string ip = autotest_server->getLocalIPv4();
-        autotest_server->start("0.0.0.0", 4999, SERVER_MODE);
-    }
+    autotest_server->start();
 }
 
 void Sample::initClient() {
-    if (!autotest_client) {
-        autotest_client = new AutoTestInterface;
-        MyCallback *listener = new MyCallback;
-        autotest_client->m_callback = listener;
-        std::string ip = autotest_client->getLocalIPv4();
-        autotest_client->start(ip.c_str(), 4999, CLIENT_MODE);
-    }
+    autotest_client->start();
 }
 
 void Sample::sendServermsg(std::string msg) {

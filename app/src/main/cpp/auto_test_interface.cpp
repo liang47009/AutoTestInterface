@@ -159,6 +159,7 @@ namespace AutoTest {
             } else {
                 LOGI("create server error!");
             }
+            ati->onStop();
         }
         return NULL;
     }
@@ -201,6 +202,7 @@ namespace AutoTest {
             } else {
                 LOGI("============ connect failed! ");
             }
+            ati->onStop();
         }
         return NULL;
     }
@@ -230,8 +232,8 @@ namespace AutoTest {
 }
 
 AutoTestInterface::AutoTestInterface()
-        : m_inited(false), m_mode(0), m_callback(NULL), conn(NULL), server_base(NULL),
-          m_baselistener(NULL), client_base(NULL) {
+        : m_inited(false), m_mode(-1), m_callback(NULL), conn(NULL), server_base(NULL),
+          m_baselistener(NULL), client_base(NULL), m_stoped(true) {
 
 }
 
@@ -260,17 +262,29 @@ AutoTestInterface::~AutoTestInterface() {
     }
 }
 
-bool AutoTestInterface::start(const char *ip, unsigned int port, int mode) {
+bool AutoTestInterface::init(const char *ip, unsigned int port, int mode) {
     if (!m_inited) {
         this->m_inited = true;
         this->m_mode = mode;
         this->hi.port = port;
         this->hi.ip = ip;
-        if (mode == CLIENT_MODE) {
+    }
+    return true;
+}
+
+bool AutoTestInterface::start() {
+    if (m_stoped) {
+        if (this->m_mode == CLIENT_MODE) {
+            m_stoped = false;
             AutoTest::init_client_thread(this);
-        } else if (mode == SERVER_MODE) {
+        } else if (this->m_mode == SERVER_MODE) {
+            m_stoped = false;
             AutoTest::init_server_thread(this);
+        } else {
+            LOGE("unknow mode, please set it!");
         }
+    } else {
+        LOGE("already running!");
     }
     return true;
 }
@@ -309,6 +323,10 @@ std::string AutoTestInterface::getLocalIPv4() {
     freeifaddrs(ifaddr);
 #endif
     return "172.19.34.237";
+}
+
+void AutoTestInterface::onStop() {
+    m_stoped = true;
 }
 
 void AutoTestInterfaceCallback::setFd(int fd) {

@@ -74,6 +74,8 @@ public:
 
     ~AutoTestInterface();
 
+    bool init(const char *ip, unsigned int port, int mode);
+
     /**
      * 启动一个接口
      * @param ip
@@ -81,7 +83,7 @@ public:
      * @param mode
      * @return
      */
-    bool start(const char *ip, unsigned int port, int mode);
+    bool start();
 
     /**
      * 自定义写入内容
@@ -100,6 +102,7 @@ public:
 
 private:
     bool m_inited;
+    bool m_stoped;
 
     int m_mode;
 
@@ -110,6 +113,7 @@ public:
     event_base *server_base;
     event_base *client_base;
 
+    void onStop();
 };
 
 #endif// __auto_test_interface_h__
